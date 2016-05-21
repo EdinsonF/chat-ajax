@@ -116,11 +116,19 @@ class Chat{
 	
 
 	public static function getChats($lastID){
+		$chats = array();
+
+		if(!$_SESSION['user']['name']){
+			$var='noUsser';
+			return array('chats' => -1);
+		}else{
+
+
 		$lastID = $lastID;
 	
 		$result = pg_query('SELECT * FROM webchat_lines WHERE id > '.$lastID.' ORDER BY id ASC');
 	
-		$chats = array();
+		
 		while($chat = pg_fetch_array($result)){
 			
 			// Returning the GMT (UTC) time of the chat creation:
@@ -136,6 +144,7 @@ class Chat{
 		}
 	
 		return array('chats' => $chats);
+		}
 	}
 	
 	public static function gravatarFromHash($hash, $size=23){

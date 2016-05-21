@@ -52,6 +52,7 @@ var chat = {
 				if(r.error){
 					chat.displayError(r.error);
 				}else{
+
 					chat.login(r.name,r.gravatar);
 				} 
 			});
@@ -108,13 +109,18 @@ var chat = {
 		// CERRAR SESION
 		
 		$('a.logoutButton').live('click',function(){
-			
+			chat.data.lastID=0;
 			$('#chatTopBar > span').fadeOut(function(){
 				$(this).remove();
 			});
 			
 			$('#submitForm').fadeOut(function(){
 				$('#loginForm').fadeIn();
+			});
+
+			$('.jspPane').fadeOut(function(){
+
+				chat.data.jspAPI.getContentPane().parent().append('<p class="noChats">Inicia sesión para ver los mensajes...</p>');
 			});
 
 			
@@ -167,12 +173,15 @@ var chat = {
 	// user's login data and shows the submit form
 	
 	login : function(name,gravatar){
-		
+		//chat.data.lastID=0;
 		chat.data.name = name;
 		chat.data.gravatar = gravatar;
 		$('#chatTopBar').html(chat.render('loginTopBar',chat.data));
 		
 		$('#loginForm').fadeOut(function(){
+
+			$('.jspPane').fadeIn();
+			$('#mientras').remove();
 			$('#submitForm').fadeIn();
 			$('#chatText').focus();
 		});
@@ -280,6 +289,7 @@ var chat = {
 			}
 			
 			if(r.chats.length){
+
 				chat.data.noActivity = 0;
 				chat.data.lastID = r.chats[i-1].id;
 			}
@@ -290,6 +300,10 @@ var chat = {
 				chat.data.noActivity++;
 			}
 			
+			if(r.chats==-1){
+				//alert("entro");
+				chat.data.jspAPI.getContentPane().html('<p class="noChats">Inicia sesión para ver los mensajes...</p>');
+			}else
 			if(!chat.data.lastID){
 				chat.data.jspAPI.getContentPane().html('<p class="noChats">No hay mensajes...</p>');
 				//alert(chat.data.lastID);
