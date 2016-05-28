@@ -1,3 +1,7 @@
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
 $(document).ready(function(){
 	
 	// Run the init method on document ready:
@@ -11,7 +15,8 @@ var chat = {
 	
 	data : {
 		lastID 		: 0,
-		noActivity	: 0
+		noActivity	: 0,
+		id_grupo    : 0
 	},
 	
 	// Init binds event listeners and sets up timers:
@@ -19,8 +24,8 @@ var chat = {
 	init : function(){
 		
 		// CAMPOS DEL FORMULARIO PARA EL LOGIN
-		$('#name').defaultText('Usuario');
-		$('#email').defaultText('Email');
+		//$('#name').defaultText('Usuario');
+		//$('#email').defaultText('Contraseña');
 
 		
 		// Converting the #chatLineHolder div into a jScrollPane,
@@ -76,10 +81,10 @@ var chat = {
 			// Assigning a temporary ID to the chat:
 			var tempID = 't'+Math.round(Math.random()*1000000),
 				params = {
-					id			: tempID,
-					author		: chat.data.name,
-					gravatar	: chat.data.gravatar,
-					text		: text.replace(/</g,'&lt;').replace(/>/g,'&gt;')
+					codigo_conversacion		: tempID,
+					usuario					: chat.data.name,
+					gravatar				: chat.data.gravatar,
+					mensaje_texto			: text.replace(/</g,'&lt;').replace(/>/g,'&gt;')
 				};
 
 
@@ -92,14 +97,14 @@ var chat = {
 			// Using our tzPOST wrapper method to send the chat
 			// via a POST AJAX request:
 			
-			$.tzPOST('submitChat',$(this).serialize(),function(r){
-
+			$.tzPOST('submitChat',{chatText:$('#chatText').val(), id_grupo:chat.data.id_grupo},function(r){
+				
 				working = false;
 			
 				$('#chatText').val('');
 				$('div.chat-'+tempID).remove();
 				
-				params['id'] = r.insertID['id'];
+				params['codigo_conversacion'] = r.codigo_conversacion['codigo_conversacion'];
 				chat.addChatLine($.extend({},params));
 			});
 			
@@ -110,6 +115,7 @@ var chat = {
 		
 		$('a.logoutButton').live('click',function(){
 			chat.data.lastID=0;
+			chat.data.id_grupo=0;
 			$('#chatTopBar > span').fadeOut(function(){
 				$(this).remove();
 			});
@@ -118,10 +124,13 @@ var chat = {
 				$('#loginForm').fadeIn();
 			});
 
+			$('.jspPane').attr('style', 'padding: 0px; top: 0px; width: 350px;');
+    		$('.jspVerticalBar').remove();
 			$('.jspPane').fadeOut(function(){
 
-				chat.data.jspAPI.getContentPane().parent().append('<p class="noChats">Inicia sesión para ver los mensajes...</p>');
+				chat.data.jspAPI.getContentPane().html('<p class="noChats">Inicia sesión para ver los mensajes...</p>');
 			});
+			$('.MisGrupos >div').remove();
 
 			
 			
@@ -134,6 +143,7 @@ var chat = {
 		// VERIFICAR LOGGIN AL RECARGAR LA PAGINA
 		
 		$.tzGET('checkLogged',function(r){
+			
 
 			if(r.logged){
 				chat.login(r.loggedAs.name,r.loggedAs.gravatar);
@@ -143,15 +153,54 @@ var chat = {
 		// Self executing timeout functions
 		
 		(function getChatsTimeoutFunction(){
-
+			
 			chat.getChats(getChatsTimeoutFunction);
+			chat.CargarGrupos();
 		})();
 		
 		(function getUsersTimeoutFunction(){
 			
-			chat.getUsers(getUsersTimeoutFunction);
+			//chat.getUsers(getUsersTimeoutFunction);
+			
 		})();
-		
+
+
+
+		///////////////////////////////////////MIS AGREGADOS---->>>>>>>
+		$('#crearGrupo').click(function(){
+		$.tzPOST('crearGrupo_addUsuaurio',$("#addUsuario,#nombreGrupo").serialize(),function(r){
+
+			if(r.error){
+					chat.displayError(r.error);
+				}else{
+
+					
+			        if(r.result==0){
+		                alert("ERROR...!");
+
+		            }else if(r.result==1){
+		                alert("Grupo Creado Con Exito - Usuario Agregado");
+
+		            }else if(r.result==2){
+		                alert("Ya estas Agregado a Este Grupo");
+		                
+		            }else if(r.result==3){
+		                alert("El Usuaurio Que Intenta Add not Existe");
+
+		                
+		            }
+
+				chat.CargarGrupos();
+				} 
+
+   
+         
+
+
+		});
+	});
+
+
 	},
 
 /////////////////////////////////////////////////--------I N I T---------///////////////////////////////////
@@ -161,7 +210,28 @@ var chat = {
 
 
 
+	CargarGrupos : function(){
+		
+		$.tzGET('CargarMisGrupos',{},function(r){
 
+            $(".MisGrupos").html("");
+
+            $.each(r.Grupos, function(index, value){
+                 
+
+                $(".MisGrupos").append("<div class='Grupo'><br><center><button name='grupo' class='btnGrupo' id='"+value['codigo_grupo']+"' value='"+value['codigo_grupo']+"'>"+value['nombre_grupo']+"</button></center></div>");
+             
+
+            });
+
+            CargarEvento();
+
+		});
+		
+
+
+		
+	},
 
 
 
@@ -206,9 +276,9 @@ var chat = {
 			
 			case 'chatLine':
 				arr = [
-					'<div class="chat chat-',params.id,' rounded"><span class="gravatar"><img src="',params.gravatar,
-					'" width="23" height="23" onload="this.style.visibility=\'visible\'" />','</span><span class="author">',params.author,
-					':</span><span class="text">',params.text,'</span><span class="time">',params.time,'</span></div>'];
+					'<div class="chat chat-',params.codigo_conversacion,' rounded"><span class="gravatar"><img src="',params.gravatar,
+					'" width="23" height="23" onload="this.style.visibility=\'visible\'" />','</span><span class="author">',params.usuario,
+					':</span><span class="text">',params.mensaje_texto,'</span><span class="time">',params.time,'</span></div>'];
 			break;
 			
 			case 'user':
@@ -244,7 +314,7 @@ var chat = {
 		
 		
 		var markup = chat.render('chatLine',params),
-			exists = $('#chatLineHolder .chat-'+params.id);
+			exists = $('#chatLineHolder .chat-'+params.codigo_conversacion);
 
 		if(exists.length){
 			exists.remove();
@@ -258,8 +328,8 @@ var chat = {
 		}
 		
 		// If this isn't a temporary chat:
-		if(params.id.toString().charAt(0) != 't'){
-			var previous = $('#chatLineHolder .chat-'+(+params.id - 1));
+		if(params.codigo_conversacion.toString().charAt(0) != 't'){
+			var previous = $('#chatLineHolder .chat-'+(+params.codigo_conversacion - 1));
 			if(previous.length){
 				previous.after(markup);
 			}
@@ -279,19 +349,20 @@ var chat = {
 	// (since lastID), and adds them to the page.
 	
 	getChats : function(callback){
-//alert(chat.data.lastID);
-		$.tzGET('getChats',{lastID: chat.data.lastID},function(r){
+	//alert(chat.data.lastID);
+		$.tzGET('getChats',{lastID: chat.data.lastID, id_grupo: chat.data.id_grupo},function(r){
 
-			//alert(r.chats);
 			
+			//alert(r.chats);
 			for(var i=0;i<r.chats.length;i++){
+				
 				chat.addChatLine(r.chats[i]);
 			}
 			
 			if(r.chats.length){
 
 				chat.data.noActivity = 0;
-				chat.data.lastID = r.chats[i-1].id;
+				chat.data.lastID = r.chats[i-1].codigo_conversacion;
 			}
 			else{
 				// If no chats were received, increment
@@ -305,6 +376,7 @@ var chat = {
 				chat.data.jspAPI.getContentPane().html('<p class="noChats">Inicia sesión para ver los mensajes...</p>');
 			}else
 			if(!chat.data.lastID){
+			 	
 				chat.data.jspAPI.getContentPane().html('<p class="noChats">No hay mensajes...</p>');
 				//alert(chat.data.lastID);
 			}
@@ -384,6 +456,8 @@ var chat = {
 		elem.hide().appendTo('body').slideDown();
 	}
 };
+
+
 //////////////////////////////////////------- C H A T ----------///////////////////////////////////////
 
 
@@ -393,6 +467,7 @@ var chat = {
 // METODOS GET Y POST PARA ENVIAR A LA BASE DE DATOS:
 
 $.tzPOST = function(action,data,callback){
+	
 	$.post('php/ajax.php?action='+action,data,callback,'json');
 }
 
@@ -401,11 +476,6 @@ $.tzGET = function(action,data,callback){
 	$.get('php/ajax.php?action='+action,data,callback,'json');
 }
 /////////////////////////////////////////////////////////
-
-
-
-
-
 
 
 // A custom jQuery method for placeholder text:
@@ -427,3 +497,70 @@ $.fn.defaultText = function(value){
 	
 	return element.blur();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-----------------------------------MI AGREGADO------------------------------------------------------->>>>>
+
+
+function CargarEvento(){
+	//----SELECCIONAR GRUPO´PARA CHATEAR--->>>
+////////////P E N D I N E N T E -----------------------------------
+    $('.btnGrupo').click(function(e){ //click en eliminar campo
+            
+            var result=$(this).parent().find('.btnGrupo').val();//----POR MEDIO DEL BOTON ELIMINAR OBTENGO EL NUMERO PARA SACAR EL ID DE LA SECCION QUE QUIERO ELIMINAR
+            //alert(result);
+            $('#id_grupo').val(result);
+
+            //----CARGO EL CHAT--->>>
+            SeleccionarGrupo_CargarChat(result);
+
+        return false;
+    });
+
+}
+
+function SeleccionarGrupo_CargarChat(id_grupo) 
+{ 
+    //alert(id_grupo);
+    if(id_grupo==''){
+
+        //alert(id_grupo);
+
+    }else{
+
+    	if(chat.data.id_grupo!=id_grupo){
+				
+				$('.jspPane').attr('style', 'padding: 0px; top: 0px; width: 350px;');
+    			$('.jspVerticalBar').remove();
+    			$('#chatLineHolder p').remove();
+
+
+    			chat.data.lastID=0;
+				chat.data.id_grupo=id_grupo;
+		    	chat.getChats('');
+    	}else{
+
+    	}
+        
+              
+
+    }
+
+
+    }
+    
+ 

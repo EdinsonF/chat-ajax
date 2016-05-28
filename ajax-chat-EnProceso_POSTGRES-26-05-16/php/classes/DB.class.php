@@ -6,7 +6,11 @@ class DB {
 	
 	private function __construct(array $dbOptions){
 
-				$cadenaConexion="host='localhost' port='5432' dbname='chatprueba' user='postgres' password='root'";
+				$cadenaConexion="host 		='".$dbOptions['db_host']."' 
+								 port 		='".$dbOptions['db_port']."' 
+								 dbname 	='".$dbOptions['db_name']."' 
+								 user 		='".$dbOptions['db_user']."' 
+								 password 	='".$dbOptions['db_pass']."'";
 
     			$conn = pg_connect($cadenaConexion) or die("Error en la Conexión: PORQUERIA".pg_last_error());
 

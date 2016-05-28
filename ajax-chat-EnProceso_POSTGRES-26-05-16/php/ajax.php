@@ -6,7 +6,7 @@ $dbOptions = array(
 	'db_host' => 'localhost',
 	'db_user' => 'postgres',
 	'db_pass' => 'root',
-	'db_name' => 'chatprueba',
+	'db_name' => 'chat',
 	'db_port' => '5432'
 );
 
@@ -20,6 +20,7 @@ require "classes/Chat.class.php";
 require "classes/ChatBase.class.php";
 require "classes/ChatLine.class.php";
 require "classes/ChatUser.class.php";
+require "classes/ChatGrupo.class.php";
 
 session_name('webchat');
 session_start();
@@ -55,7 +56,7 @@ try{
 		break;
 		
 		case 'submitChat':
-			$response = Chat::submitChat($_POST['chatText']);
+			$response = Chat::submitChat($_POST['chatText'],$_POST['id_grupo']);
 		break;
 		
 		case 'getUsers':
@@ -63,7 +64,15 @@ try{
 		break;
 		
 		case 'getChats':
-			$response = Chat::getChats($_GET['lastID']);
+			$response = Chat::getChats($_GET['lastID'], $_GET['id_grupo']);
+		break;
+
+		case 'crearGrupo_addUsuaurio':
+			$response = Chat::CrearGroup_AddUsser($_POST['addUsuario'],$_POST['grupo']);
+		break;
+
+		case 'CargarMisGrupos':
+			$response = Chat::CargarMisGrupos();
 		break;
 		
 		default:

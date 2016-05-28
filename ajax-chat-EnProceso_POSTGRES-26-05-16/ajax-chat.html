@@ -21,13 +21,16 @@
     </div>
 
 <!-- Chat en movimiento -->
-<div id="mensajes"></div>
+
     <div id="chatLineHolder">
         
     </div>
 
  <!-- Usuarios online -->   
-    <div id="chatUsers" class="rounded"></div>
+    <div id="chatUsers" class="rounded">
+        <div class="MisGrupos">
+        </div>
+    </div>
 
 
     
@@ -37,8 +40,8 @@
         <div class="tip"></div>
         
         <form id="loginForm" method="post" action="">
-            <input id="name" name="name" class="rounded" maxlength="16" />
-            <input id="email" name="email" class="rounded" />
+            <input id="name" name="name" class="rounded" maxlength="16" placeholder="Usuario" autocomplete="off" />
+            <input type="password" id="email" name="email" class="rounded" placeholder="Contraseña" autocomplete="off"/>
             <input type="submit" class="blueButton" value="Entrar" />
         </form>
         
@@ -46,18 +49,31 @@
 
         <form id="submitForm" method="post" action="">
             <input id="chatText" name="chatText" class="rounded" maxlength="255" />
-            <input type="submit" class="blueButton" value="Submit" />
+            <input type="submit" class="blueButton" value="Submit" /><br>
+
         </form>
+
+        <div class="CrearGrupo">
+            CREAR GRUPO Y AGREGAR USUARIOS
+            <br>
+            usuario:        <input type='text' id='addUsuario' name='addUsuario' class="rounded"><br> <br>
+            Grupo: &nbsp;   <input type='text' id='nombreGrupo' name='grupo' class="rounded">
+            <input type='button' id='crearGrupo' name='grupo' class="blueButton" value='Crear' >
+        </div>
         
     </div>
     
 </div>
 
-
+</body>
 
 <script src="js/jquery1.4.2.min.js"></script>
 <script src="js/jScrollPane/jquery.mousewheel.js"></script>
 <script src="js/jScrollPane/jScrollPane.min.js"></script>
 <script src="js/script.js"></script>
-</body>
+
+<!-- <script src="js/jquery-1.9.1.js"></script> -->
+<!-- <script src="js/jquery-ui-1.10.3.custom.js"></script>
+<script src="js/jquery-ui-1.10.3.custom.min.js"></script> -->
+
 </html>
