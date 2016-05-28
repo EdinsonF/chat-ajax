@@ -53,12 +53,19 @@ class Chat{
 
 	
 	public static function logout(){
-		//DB::query("DELETE FROM webchat_users WHERE name = '".DB::esc($_SESSION['user']['name'])."'");
 		
-		$_SESSION = array();
-		unset($_SESSION);
 
-		return array('status' => 1);
+		$user = new ChatUser(array('name' 	 => $_SESSION['user']['name'],
+								   'gravatar'=> $_SESSION['user']['gravatar']));
+		$result=$user->CerrarSesion();
+		
+		if($result>0){
+			$_SESSION = array();
+			unset($_SESSION);
+
+			return array('status' => 1);
+		}
+		
 	}
 	
 	public static function submitChat($chatText, $id_grupo){
@@ -85,30 +92,44 @@ class Chat{
 		);
 	}
 	
-	public static function getUsers(){
+	public static function getUsers($id_grupo){
+		$users = array();
+		$yo=$_SESSION['user']['name'];
+		if(!$_SESSION['user']['name']){
+			
+			return array('users'=> '',
+						'total' => -1);
+		}else
 		if($_SESSION['user']['name']){
 			$user = new ChatUser(array('name' 	 => $_SESSION['user']['name'],
 									   'gravatar'=> $_SESSION['user']['gravatar']));
 			$user->update();
+
+
+			$result = pg_query("SELECT  usuario.usuario, usuario.id_usuario, usuario.contrasena
+							FROM inter_usuario_grupo
+							INNER JOIN grupo
+							ON grupo.codigo_grupo=inter_usuario_grupo.codigo_grupo
+							INNER JOIN usuario
+							ON usuario.id_usuario=inter_usuario_grupo.id_usuario_add 
+							AND grupo.codigo_grupo=$id_grupo AND usuario.estatus='ACTIVO' AND usuario.usuario!='$yo'");
+		
+		
+			while($user = pg_fetch_object($result)){
+				
+				$users[] = $user;
+			}
+		
+			return array(
+				'users' => $users,
+				'total' => pg_num_rows($result));
+
+
 		}
 		
-		// Deleting chats older than 5 minutes and users inactive for 30 seconds
 		
-		// pg_query("DELETE FROM webchat_lines WHERE ts < SUBTIME(NOW(),'0:5:0')");
-		// pg_query("DELETE FROM webchat_users WHERE last_activity < SUBTIME(NOW(),'0:0:30')");
 		
-		$result = pg_query('SELECT * FROM webchat_users ORDER BY name ASC LIMIT 18');
-		
-		$users = array();
-		while($user = pg_fetch_object($result)){
-			$user->gravatar = Chat::gravatarFromHash($user->gravatar,30);
-			$users[] = $user;
-		}
-	
-		return array(
-			'users' => $users,
-			'total' => pg_fetch_object(pg_query('SELECT COUNT(*) as total FROM webchat_users')));
-	}
+}//----FIN DE LA CLASE
 	
 
 	public static function getChats($lastID, $id_grupo){
@@ -168,7 +189,7 @@ class Chat{
 				'name'		=> $_SESSION['user']['name'],
 				'gravatar'	=> $_SESSION['user']['gravatar']
 			));
-		$patrocinador=$usser->id_usuarioActivo();
+		$patrocinador=$usser->idUsuario_Patrocinador();
 
 		$grupo=new ChatGrupo(array(
 			'usuario'		=> $usserAdd,
@@ -188,12 +209,12 @@ class Chat{
 	public static function CargarMisGrupos(){
 
 		
-
 		$usser= new ChatUser (array(
 				'name'		=> $_SESSION['user']['name'],
 				'gravatar'	=> $_SESSION['user']['gravatar']
 			));
-		$patrocinador=$usser->id_usuarioActivo();
+
+		$patrocinador=$usser->idUsuario_Patrocinador();
 
 
 		$grupo=new ChatGrupo(array(

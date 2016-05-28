@@ -40,24 +40,31 @@ class ChatUser extends ChatBase{
 		
 	
 	public function update(){
-		$strl=pg_query("UPDATE webchat_users SET last_activity = NOW() WHERE name='".pg_escape_string($this->name)."' AND gravatar='".pg_escape_string($this->gravatar)."'");
-				
+		$strl=pg_query("UPDATE usuario SET estatus = 'ACTIVO' 
+						WHERE usuario='".pg_escape_string($this->name)."'
+						AND contrasena='".pg_escape_string($this->gravatar)."'");			
+	}
+
+
+	public function CerrarSesion(){
+		$strl=pg_query("UPDATE usuario SET estatus = 'INACTIVO' 
+						WHERE usuario='".pg_escape_string($this->name)."'
+						AND contrasena='".pg_escape_string($this->gravatar)."'");
+		return pg_affected_rows($strl);			
 	}
 
 
 
 	/////---------MI AGREGADO---->>>>>
 
-	public function id_usuarioActivo(){
+	public function idUsuario_Patrocinador(){
 
 		$stsql=pg_query("SELECT id_usuario FROM usuario 
 						WHERE usuario='".pg_escape_string($this->name)."'
 						AND contrasena='".pg_escape_string($this->gravatar)."'");
 
 		$reg=pg_fetch_array($stsql);
-
 		return $reg['id_usuario'];
-
 
 	}
 }

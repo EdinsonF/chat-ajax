@@ -60,7 +60,7 @@ try{
 		break;
 		
 		case 'getUsers':
-			$response = Chat::getUsers();
+			$response = Chat::getUsers($_GET['id_grupo']);
 		break;
 		
 		case 'getChats':

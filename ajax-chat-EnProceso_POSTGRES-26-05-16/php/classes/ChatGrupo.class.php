@@ -26,7 +26,7 @@ class ChatGrupo extends ChatBase{
 			}else{
 				//---CREADOR DEL GRUPO
 				$inserto=pg_query("INSERT INTO inter_usuario_grupo (codigo_grupo,id_usuario_add,usuario_patrocinador, estatus)
-						VALUES('$codigo_grupo','$this->patrocinador','$this->patrocinador','CREADOR')") or die('ERROR AL INSERTAR DATOS: ' . pg_last_error());
+									VALUES('$codigo_grupo','$this->patrocinador','$this->patrocinador','CREADOR')") or die('ERROR AL INSERTAR DATOS: ' . pg_last_error());
 				$registro = pg_affected_rows($inserto);
 				if($registro>0){
 

@@ -131,6 +131,8 @@ var chat = {
 				chat.data.jspAPI.getContentPane().html('<p class="noChats">Inicia sesión para ver los mensajes...</p>');
 			});
 			$('.MisGrupos >div').remove();
+			$('#chatUsers >p').remove();
+			$('#chatUsers >div').remove();
 
 			
 			
@@ -160,7 +162,7 @@ var chat = {
 		
 		(function getUsersTimeoutFunction(){
 			
-			//chat.getUsers(getUsersTimeoutFunction);
+			chat.getUsers(getUsersTimeoutFunction);
 			
 		})();
 
@@ -283,8 +285,8 @@ var chat = {
 			
 			case 'user':
 				arr = [
-					'<div class="user" title="',params.name,'"><img src="',
-					params.gravatar,'" width="30" height="30" onload="this.style.visibility=\'visible\'" /></div>'
+					'<div class="user" title="',params.usuario,'"><img src="',
+					params.contrasena,'" width="30" height="30" onload="this.style.visibility=\'visible\'" /></div>'
 				];
 			break;
 		}
@@ -407,7 +409,7 @@ var chat = {
 	// Requesting a list with all the users.
 	
 	getUsers : function(callback){
-		$.tzGET('getUsers',function(r){
+		$.tzGET('getUsers',{id_grupo: chat.data.id_grupo},function(r){
 
 
 			var users = [];
@@ -420,18 +422,27 @@ var chat = {
 			
 			var message = '';
 			
-			if(r.total['total']<1){
+			//alert(chat.data.id_grupo);
+			 if(chat.data.id_grupo==0){
+				if(r.total==-1){
+				
+				}else{
+					message = 'Selecciona un grupo para ver las personas disponibles';
+				}
+				
+			}
+			else if(r.total<1){
 				message = '(0) Personas conectadas';
 			}
-			else {
-				message = r.total['total']+' '+(r.total['total'] == 1 ? 'Persona(s)':'people')+' conectada(s)';
+			else{
+				message = r.total+' '+(r.total == 1 ? 'Persona':'Persona(s)')+' conectada(s)';
 			}
 			
 			users.push('<p class="count">'+message+'</p>');
 			
 			$('#chatUsers').html(users.join(''));
 			
-			setTimeout(callback,15000);
+			setTimeout(callback,600);
 		});
 	},
 	
